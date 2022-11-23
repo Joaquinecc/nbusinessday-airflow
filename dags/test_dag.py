@@ -11,7 +11,7 @@ def print_hello():
 with DAG(
     'hellow_world',
     start_date=datetime(2022,1,1),
-    timetable=NBusinessDay(20,Time(16,25 )),
+    timetable=NBusinessDay(15,Time(10,25 )),
     catchup=False
     ) as dag:
     hello_operator = PythonOperator(task_id='hello_task', python_callable=print_hello, dag=dag)

@@ -56,8 +56,6 @@ class NBusinessDay(Timetable):
         return cls(int(value["n_day"]),Time.fromisoformat(value["schedule_at"]))   
         
     def infer_manual_data_interval(self, run_after: DateTime) -> DataInterval:
-        print("pwd ",os.getcwd())
-        print("ls ",os.listdir("plugins/"))
         n_bussiness_day_current_month=n_dia_habil(self.n_day,run_after.month,run_after.year,self._schedule_at)
         print("n_bussiness_day_current_month ", n_bussiness_day_current_month)
         if run_after< n_bussiness_day_current_month:
@@ -76,7 +74,6 @@ class NBusinessDay(Timetable):
     ) -> Optional[DagRunInfo]:
         if last_automated_data_interval is not None:  # There was a previous run on the regular schedule.
             last_end = last_automated_data_interval.end
-            print("last_end : ",last_end)
             n_bussiness_day_current_month=n_dia_habil(self.n_day,last_end.month,last_end.year,self._schedule_at)
             if last_end<n_bussiness_day_current_month : # If previous run was already pass the n business day of current month
                 next_start = n_dia_habil(self.n_day,last_end.month-1,last_end.year,self._schedule_at)
