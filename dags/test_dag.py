@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
-from b_day import NBusinessDay
+from business_day import NBusinessDay
 from pendulum import Time
 
 
