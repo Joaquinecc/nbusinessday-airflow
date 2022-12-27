@@ -28,12 +28,19 @@ def n_dia_habil(n:int,month:int,year:int,time:Time=Time.min) ->DateTime:
         year-=1  
     day=1
     #Get list of holidays in datetime.date format
-    holidays=pd.to_datetime(pd.read_csv("plugins/feriados.csv",sep='\t').NOMBRE).dt.date
+    holidays=pd.to_datetime(pd.read_csv("plugins/feriados.csv",sep='\t').NOMBRE,format="%d/%m/%Y").dt.date
     #remove unnecesary holidays
     minimum_day=date(year,month,1)
     holidays=holidays[holidays>=minimum_day]
     while(n>0):
-        date_t=Date(year,month,day)
+        try:
+            date_t=Date(year,month,day)
+        except ValueError as e:
+            #If an error occur return the previous valid day
+            print(e)
+            print('Return the previous valid day')
+            date_t=Date(year,month,day-1)
+            return DateTime.combine(date_t,time).replace(tzinfo=UTC)
         day+=1
         #if sunday or saturday, skip and not count
         if date_t.weekday() in (5,6):
@@ -47,9 +54,9 @@ class NBusinessDay(Timetable):
     def __init__(self, n_day: int,schedule_at: Time):
         self.n_day=n_day
         self._schedule_at = schedule_at
-
+        self.description = "El dag se ejecutara el {self.n_day} dia habil de cada mes"
     def serialize(self):
-        return {"n_day": str(self.n_day),"schedule_at": self._schedule_at.isoformat()}
+        return {"n_day": self.n_day,"schedule_at": self._schedule_at.isoformat()}
 
     @classmethod
     def deserialize(cls, value):
@@ -97,7 +104,11 @@ class NBusinessDay(Timetable):
         if restriction.latest is not None and next_start > restriction.latest:
             return None  # Over the DAG's scheduled end; don't schedule.
         return DagRunInfo.interval(start=next_start, end=next_end)
-
+    
+    @property
+    def summary(self) -> str:
+        return f"{self.n_day} dia habil"
+    
 
 class NBusinessTimetablePlugin(AirflowPlugin):
     name = "nbusiness_timetable_plugin"
